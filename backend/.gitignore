@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+env/
+venv/
+.env
+
+# Alembic / migrations
+/alembic
+/alembic.ini
+
+# Uploads / temp files
+/uploads/
+
+# IDE
+.vscode/
+.idea/
