@@ -15,6 +15,7 @@ import os
 from dotenv import load_dotenv
 
 from database import get_db, User, Chat, ChatParticipant, Message
+import bcrypt
 
 load_dotenv()
 
@@ -167,11 +168,13 @@ def register(user: UserCreate, db=Depends(get_db)):
     if user_exists:
         raise HTTPException(status_code=400, detail="Username already exists")
 
+    hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
+
     new_user = User(
         username=user.username,
         display_name=user.display_name,
         email=user.email,
-        password=user.password,
+        password=hashed_password,
     )
 
     try:
@@ -189,7 +192,7 @@ def register(user: UserCreate, db=Depends(get_db)):
 def login(user: UserLogin, db=Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
 
-    if not db_user or db_user.password != user.password:
+    if not db_user or not bcrypt.checkpw(user.password.encode(), db_user.password.encode()):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": db_user.username})

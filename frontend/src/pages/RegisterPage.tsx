@@ -101,6 +101,7 @@ function LoginPage() {
                                 type="password"
                                 placeholder="qwerty123"
                                 required
+                                pattern="^(?=.*\d)[A-Za-z\d]{8,}$"
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                     setErrorMessage(null);
