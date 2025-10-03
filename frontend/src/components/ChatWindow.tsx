@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import TextareaAutosize from 'react-textarea-autosize';
-import arrowBack from '../images/arrow-back.svg';
 import axios from "axios";
 import Loader from "./Loader";
 
@@ -70,7 +69,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
 
         fetchMessages();
 
-        const wsInstance = new WebSocket(`ws://localhost:5000/ws/chat/${chat.chatId}`);
+        const wsInstance = new WebSocket(`ws://localhost:5050/ws/chat/${chat.chatId}`);
         ws.current = wsInstance;
 
         wsInstance.onmessage = (event) => {
@@ -196,7 +195,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                     {msg.sender?.display_name ? <p className="text-xs text-white/50">{msg.sender?.display_name}</p> : <p className="text-xs text-white/50">{msg.sender?.username}</p>}
                                     {msg.image_url && (
                                         <img
-                                            src={`http://localhost:5000${msg.image_url}`}
+                                            src={`http://localhost:5050${msg.image_url}`}
                                             alt="uploaded"
                                             className="w-72 rounded-2xl my-2"
                                         />
@@ -210,7 +209,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                 </div>
 
                                 {msg.sender?.id !== chat.userId && (
-                                    <div className="flex flex-col h-full justify-center gap-2">
+                                    <div className="flex flex-row h-full justify-center gap-2">
                                         <button onClick={() => {
                                             setIsEditing(true);
                                             setEditMessageId(msg.id);
