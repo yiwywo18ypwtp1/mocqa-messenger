@@ -1,9 +1,12 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import sessionmaker, relationship, declarative_base
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-DATABASE_URL = "postgresql://ashashasadafda:y13rg9c0@localhost:5432/mocqa_messenger"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
