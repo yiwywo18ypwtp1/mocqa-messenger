@@ -21,9 +21,7 @@ cd mocqa-messenger
 ```bash
 cd backend
 poetry install
-cp .env.example .env
-# configure your environment variables
-uvicorn main:app --reload
+uvicorn main:app --port 5000 --reload
 ```
 
 3. Frontend setup:
