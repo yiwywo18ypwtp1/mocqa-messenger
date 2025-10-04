@@ -38,7 +38,7 @@ npm start
 
 ## Quick Start
 
-* Backend runs on `http://localhost:8000`
+* Backend runs on `http://localhost:5000`
 * Frontend runs on `http://localhost:3000`
 * Use Docker (optional) to run both services together:
 
