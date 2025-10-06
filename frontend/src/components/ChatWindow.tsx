@@ -17,6 +17,7 @@ type Message = {
     content: string;
     sent_time: string;
     image_url?: string;
+    reply_content?: string;
     sender: {
         id: number;
         username: string;
@@ -33,6 +34,9 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [oldMessageContent, setOldMessageContent] = useState<string | null>(null)
     const [editMessageId, setEditMessageId] = useState<number | null>(null);
+
+    const [isReplying, setIsReplying] = useState<boolean>(false)
+    const [replyedMessageContent, setReplyedMessageContent] = useState<string | null>(null)
 
     const ws = useRef<WebSocket | null>(null);
 
@@ -111,9 +115,11 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
         if (isEditing) return;
 
         const formData = new FormData();
+
         formData.append("chat_id", chat.chatId.toString());
         if (messageContent) formData.append("content", messageContent);
         if (selectedFile) formData.append("image", selectedFile);
+        if (replyedMessageContent) formData.append("reply_content", replyedMessageContent)
 
         try {
             await axios.post("/messages", formData, {
@@ -128,6 +134,9 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
 
         setMessageContent("");
         setSelectedFile(null);
+
+        setIsReplying(false);
+        setReplyedMessageContent(null);
     };
 
     const deleteMessage = async (messageId: number) => {
@@ -181,7 +190,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                         </button>
                         <div className="flex flex-col items-end">
                             {chat.displayName ? <span className="text-lg">{chat.displayName}</span> : <span className="text-lg">{chat.username}</span>}
-                            <p className="text-white/50 italic">@{chat.username} (id:{chat.userId})</p>
+                            <p className="text-white/50 italic">@{chat.username}</p>
                         </div>
                     </div>
 
@@ -191,8 +200,14 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                 key={msg.id}
                                 className={`flex ${msg.sender?.id === chat.userId ? "flex-row" : "flex-row-reverse"} gap-3`}
                             >
-                                <div className={`flex flex-col ${msg.sender?.id === chat.userId ? "bg-[#313640] items-start self-start px-3 py-2 other-message max-w-[50%]" : "bg-[#9371EB] items-end self-end px-3 py-2 my-message max-w-[50%]"}`}>
+                                <div className={`flex flex-col gap-1 ${msg.sender?.id === chat.userId ? "bg-[#313640] items-start self-start px-3 py-2 other-message max-w-[50%]" : "bg-[#9371EB] items-end self-end px-3 py-2 my-message max-w-[50%]"}`}>
                                     {msg.sender?.display_name ? <p className="text-xs text-white/50">{msg.sender?.display_name}</p> : <p className="text-xs text-white/50">{msg.sender?.username}</p>}
+                                    {msg.reply_content && (
+                                        <div className="flex flex-row items-center bg-white/35 px-3 py-1 rounded-lg gap-2">
+                                            <img src="/images/reply.svg" className="h-5 opacity-50" />
+                                            <p>{msg.reply_content}</p>
+                                        </div>
+                                    )}
                                     {msg.image_url && (
                                         <img
                                             src={`http://localhost:5050${msg.image_url}`}
@@ -208,9 +223,10 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                     </div>
                                 </div>
 
-                                {msg.sender?.id !== chat.userId && (
+                                {msg.sender?.id !== chat.userId ? (
                                     <div className="flex flex-row h-full justify-center gap-2">
                                         <button onClick={() => {
+                                            setIsReplying(false);
                                             setIsEditing(true);
                                             setEditMessageId(msg.id);
                                             setOldMessageContent(msg.content);
@@ -220,6 +236,16 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
 
                                         <button onClick={() => deleteMessage(msg.id)}>
                                             <img src="/images/delete.svg" alt="Send" className="h-10 bg-white/15 p-1 rounded-xl hover:bg-white/35 transition-all duration-350" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-row-reverse h-full justify-center gap-2">
+                                        <button onClick={() => {
+                                            setIsEditing(false);
+                                            setIsReplying(true);
+                                            setReplyedMessageContent(msg.content);
+                                        }}>
+                                            <img src="/images/reply.svg" alt="Edit" className="h-10 bg-white/15 p-2 rounded-xl hover:bg-white/35 transition-all duration-350" />
                                         </button>
                                     </div>
                                 )}
@@ -237,10 +263,13 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                             isEditing ? editMessage(editMessageId, oldMessageContent) : sendMessage();
                         }}
                     >
-                        {isEditing ?
+                        {isEditing ? (
                             <div className="flex flex-col w-full bg-[#21242B]/50 rounded-2xl">
                                 <div className="flex flex-row items-center justify-between mx-3 mt-3 mb-2 px-3 py-1 bg-[#9371EB]/50 rounded-t-xl rounded-b-md">
-                                    {oldMessageContent}
+                                    <div className="flex flex-row gap-2 items-center">
+                                        <img src="/images/edit.svg" className="h-4 opacity-50" />
+                                        <p>{oldMessageContent}</p>
+                                    </div>
                                     <p
                                         onClick={() => setIsEditing(false)}
                                         className="text-lg cursor-pointer"
@@ -263,8 +292,38 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                     }}
                                     className="bg-[#21242B]/75 px-5 min-h-12 rounded-2xl w-full focus:bg-[#21242B]/90 pt-3 focus:outline-none custom-scroll resize-none"
                                 />
-
-                            </div> :
+                            </div>
+                        ) : isReplying ? (
+                            <div className="flex flex-col w-full bg-[#21242B]/50 rounded-2xl">
+                                <div className="flex flex-row items-center justify-between mx-3 mt-3 mb-2 px-3 py-1 bg-[#9371EB]/50 rounded-t-xl rounded-b-md">
+                                    <div className="flex flex-row gap-2 items-center">
+                                        <img src="/images/reply.svg" className="h-4 opacity-50" />
+                                        <p>{replyedMessageContent}</p>
+                                    </div>
+                                    <p
+                                        onClick={() => setIsReplying(false)}
+                                        className="text-lg cursor-pointer"
+                                    >
+                                        ×
+                                    </p>
+                                </div>
+                                <TextareaAutosize
+                                    minRows={1}
+                                    maxRows={4}
+                                    placeholder="Enter message here"
+                                    value={messageContent || ""}
+                                    onChange={(e) => setMessageContent(e.target.value)}
+                                    required
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            sendMessage();
+                                        }
+                                    }}
+                                    className="bg-[#21242B]/75 px-5 min-h-12 rounded-2xl w-full focus:bg-[#21242B]/90 pt-3 focus:outline-none custom-scroll resize-none"
+                                />
+                            </div>
+                        ) : (
                             <div className="flex w-full">
                                 <TextareaAutosize
                                     minRows={1}
@@ -282,6 +341,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                     className="bg-[#21242B]/75 px-5 min-h-12 rounded-2xl w-full focus:bg-[#21242B]/90 pt-3 focus:outline-none custom-scroll resize-none"
                                 />
                             </div>
+                        )
                         }
                         <label className={`min-w-12 h-12 flex justify-center items-center ${selectedFile ? "bg-[#9371EB]" : "bg-[#555]"}  cursor-pointer text-white rounded-2xl viol-glow`}>
                             <img src={selectedFile ? "/images/done.svg" : "/images/clip.svg"} alt="Add photo" className="h-5 " />

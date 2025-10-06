@@ -54,9 +54,9 @@ function LoginPage() {
         <div className="flex flex-col h-screen">
             <Header />
             <div className="flex-1 flex justify-center">
-                <form className="glass-back w-1/4 h-fit p-8 mt-32 rounded-3xl flex flex-col items-center justify-between gap-6">
-                    <div className="flex flex-col gap-5 w-full">
-                        <div className="flex flex-col gap-1 items-center">
+                <form className="glass-back w-1/4 h-fit p-8 mt-32 rounded-3xl flex flex-col items-center justify-between gap-5">
+                    <div className="flex flex-col gap-4 w-full">
+                        <div className="flex flex-col gap-2 items-center">
                             <label>Username</label>
                             <input
                                 type="text"
@@ -69,7 +69,7 @@ function LoginPage() {
                                 className="bg-[#21242B]/50 outline-none w-full h-12 rounded-2xl px-5 text-white placeholder:text-white/50 focus:outline-none focus:placeholder-transparent focus:bg-[#21242B]/75 transition-all duration-500"
                             />
                         </div>
-                        <div className="flex flex-col gap-1 items-center">
+                        <div className="flex flex-col gap-2 items-center">
                             <label>Display Name</label>
                             <input
                                 type="text"
@@ -82,7 +82,7 @@ function LoginPage() {
                                 className="bg-[#21242B]/50 outline-none w-full h-12 rounded-2xl px-5 text-white placeholder:text-white/50 focus:outline-none focus:placeholder-transparent focus:bg-[#21242B]/75 transition-all duration-500"
                             />
                         </div>
-                        <div className="flex flex-col gap-1 items-center">
+                        <div className="flex flex-col gap-2 items-center">
                             <label>E-mail</label>
                             <input
                                 type="email"
@@ -95,7 +95,7 @@ function LoginPage() {
                                 className="bg-[#21242B]/50 outline-none w-full h-12 rounded-2xl px-5 text-white placeholder:text-white/50 focus:outline-none focus:placeholder-transparent focus:bg-[#21242B]/75 transition-all duration-500"
                             />
                         </div>
-                        <div className="flex flex-col gap-1 items-center">
+                        <div className="flex flex-col gap-2 items-center">
                             <label>Password</label>
                             <input
                                 type="password"

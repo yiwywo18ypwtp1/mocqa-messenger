@@ -51,6 +51,7 @@ class Message(Base):
     chat_id = Column(Integer, ForeignKey("chats.id", ondelete="CASCADE"), nullable=False)
     sender_id = Column(Integer, nullable=False)
     content = Column(Text, nullable=False)
+    reply_content = Column(Text, nullable=True)
     sent_time = Column(DateTime, default=datetime.utcnow)
     image_url = Column(String, nullable=True)
 

@@ -117,7 +117,7 @@ def get_current_user(request: Request, db=Depends(get_db)):
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: dict[int, List[WebSocket]] = {}  # ключ — chat_id
+        self.active_connections: dict[int, List[WebSocket]] = {}
 
     async def connect(self, chat_id: int, websocket: WebSocket):
         await websocket.accept()
@@ -300,6 +300,7 @@ def get_chats(db=Depends(get_db), current_user=Depends(get_current_user), creden
 async def send_message(
     chat_id: int = Form(...),
     content: str = Form(None),
+    reply_content: str = Form(None),
     image: UploadFile = File(None),
     current_user=Depends(get_current_user),
     db=Depends(get_db),
@@ -330,6 +331,7 @@ async def send_message(
         chat_id=chat.id,
         sender_id=current_user.id,
         content=content,
+        reply_content=reply_content,
         image_url=image_url,
         sent_time=datetime.utcnow()
     )
@@ -342,6 +344,7 @@ async def send_message(
         "chat_id": new_message.chat_id,
         "sender_id": new_message.sender_id,
         "content": new_message.content,
+        "reply_content": new_message.reply_content,
         "image_url": new_message.image_url,
         "sent_time": new_message.sent_time.isoformat(),
         "sender_username": current_user.username
@@ -377,6 +380,7 @@ def get_messages_in_chat(chat_id: int = Query(...), current_user=Depends(get_cur
             "id": msg.id,
             "chat_id": msg.chat_id,
             "content": msg.content,
+            "reply_content": msg.reply_content,
             "sent_time": msg.sent_time,
             "image_url": msg.image_url,
             "sender": {
