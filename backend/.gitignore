@@ -10,10 +10,6 @@ env/
 venv/
 .env
 
-# Alembic / migrations
-/alembic
-/alembic.ini
-
 # Uploads / temp files
 /uploads/
 
