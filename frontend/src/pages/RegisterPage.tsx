@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { registerUser, loginUser } from "../api/api";
 
 function LoginPage() {
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     const [username, setUsername] = useState<string | null>(null)
     const [displayName, setDisplayName] = useState<string | null>(null)
@@ -21,27 +21,11 @@ function LoginPage() {
         }
 
         try {
-            const regResponse = await axios.post('/register', {
-                username: username,
-                display_name: displayName,
-                email: email,
-                password: password
-            });
+            await registerUser(username, displayName, email, password);
+            const loginResponse = await loginUser(username, password);
+            localStorage.setItem("accessToken", loginResponse.data.access_token);
 
-            console.log(regResponse);
-
-            try {
-                const loginResponse = await axios.post('/login', {
-                    username: username,
-                    password: password
-                });
-
-                console.log(loginResponse);
-                localStorage.setItem("accessToken", loginResponse.data.access_token);
-                navigate("/");
-            } catch (error) {
-                console.error(error);
-            }
+            navigate("/");
 
         } catch (error) {
             console.error(error);

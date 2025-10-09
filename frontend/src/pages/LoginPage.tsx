@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { loginUser } from "../api/api";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -19,13 +19,9 @@ function LoginPage() {
         }
 
         try {
-            const response = await axios.post('/login', {
-                username: username,
-                password: password
-            });
+            const loginResponse = await loginUser(username, password);
+            localStorage.setItem("accessToken", loginResponse.data.access_token);
 
-            localStorage.setItem("accessToken", response.data.access_token);
-            console.log(response);
             navigate("/");
 
         } catch (error) {

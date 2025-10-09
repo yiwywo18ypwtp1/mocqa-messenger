@@ -94,7 +94,6 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                     return;
                 }
 
-                // otherwise assume it's a new message payload
                 setMessages((prev) => [
                     ...prev,
                     {

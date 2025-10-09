@@ -7,11 +7,15 @@ export const setTokenGetter = (fn: () => string | null) => {
     tokenGetter = fn;
 };
 
-const api: AxiosInstance = axios.create({
+const privateApi: AxiosInstance = axios.create({
     baseURL: BASE_URL,
 });
 
-api.interceptors.request.use((config) => {
+const publicApi: AxiosInstance = axios.create({
+    baseURL: BASE_URL,
+});
+
+privateApi.interceptors.request.use((config) => {
     const token = tokenGetter?.();
     if (token) {
         const headers = new AxiosHeaders(config.headers);
@@ -21,18 +25,27 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// 
+// messages
 export const fetchMessages = (chatId: number) =>
-    api.get("/messages", { params: { chat_id: chatId } }).then((r) => r.data.messages);
+    privateApi.get("/messages", { params: { chat_id: chatId } }).then((r) => r.data.messages);
 
 export const postMessage = (formData: FormData) =>
-    api.post("/messages", formData, {
+    privateApi.post("/messages", formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 
-export const deleteMessage = (messageId: number) => api.delete(`/messages/${messageId}`);
+export const deleteMessage = (messageId: number) => privateApi.delete(`/messages/${messageId}`);
 
 export const patchMessage = (messageId: number, new_content: string) =>
-    api.patch(`/messages/${messageId}`, { new_content });
+    privateApi.patch(`/messages/${messageId}`, { new_content });
 
-export default api;
+
+// users
+export const registerUser = (username: string, displayName: string, email: string, password: string) =>
+    publicApi.post("/register", { username, display_name: displayName, email, password });
+
+export const loginUser = (username: string, password: string) =>
+    publicApi.post("/login", { username, password });
+
+
+export { publicApi, privateApi };
