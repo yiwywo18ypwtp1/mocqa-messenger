@@ -21,7 +21,7 @@ cd mocqa-messenger
 ```bash
 cd backend
 poetry install
-uvicorn main:app --port 5000 --reload
+uvicorn main:app --port 5050 --reload
 ```
 
 3. Frontend setup:
@@ -36,7 +36,7 @@ npm start
 
 ## Quick Start
 
-* Backend runs on `http://localhost:5000`
+* Backend runs on `http://localhost:5050`
 * Frontend runs on `http://localhost:3000`
 * Use Docker (optional) to run both services together:
 
