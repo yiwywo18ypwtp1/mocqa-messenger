@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
                 "Authorization": "Bearer " + token
             }
         })
-            .then(response => setIsLoading(false))
+            .then(() => setIsLoading(false))
             .catch(() => navigate("/login"));
     }, [navigate]);
 

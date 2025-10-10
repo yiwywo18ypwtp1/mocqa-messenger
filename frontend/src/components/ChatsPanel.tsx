@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { useAlert } from "../context/AlertContext";
 
 type Participant = {
     id: number;
@@ -20,6 +21,8 @@ type ChatPanelProps = {
 }
 
 const ChatsPanel = ({ chat }: { chat: ChatPanelProps }) => {
+    const { addAlert } = useAlert();
+
     const [chats, setChats] = useState<ChatFromServer[]>([]);
     const [searchInput, setSearchInput] = useState<string>("");
     const [currentUser, setCurrentUser] = useState<{ id: number, username: string, display_name: string } | null>(null);
@@ -50,7 +53,6 @@ const ChatsPanel = ({ chat }: { chat: ChatPanelProps }) => {
 
         const token = localStorage.getItem("accessToken")
 
-        console.log("Token before request:", token);
         try {
             const response = await axios.post("/chats",
                 {
@@ -68,9 +70,12 @@ const ChatsPanel = ({ chat }: { chat: ChatPanelProps }) => {
                 participants: response.data.participants
             };
             setChats(prev => [...prev, newChat]);
+            addAlert("Friend added! Enjoy chatting :)", "success");
 
-        } catch (error) {
-            console.error("Error creating chat:", error);
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                addAlert("No user with such username. Please enter correct username", "error")
+            }
         }
     }
 

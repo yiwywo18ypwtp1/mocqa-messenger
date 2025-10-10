@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import Loader from "./Loader";
 import { fetchMessages, postMessage, deleteMessage as apiDeleteMessage, patchMessage } from "../api/api";
 import { useSocket } from "../hooks/useSocket";
+import { useAlert } from "../context/AlertContext";
 
 type ChatProps = {
     chatId: number;
@@ -27,6 +28,8 @@ type Message = {
 };
 
 const ChatWindow = ({ chat }: { chat: ChatProps }) => {
+    const { addAlert } = useAlert();
+
     const [messageContent, setMessageContent] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(false);
@@ -48,7 +51,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
         scrollToBottom();
     }, [messages]);
 
-    const { socket, connected } = useSocket(chat.chatId);
+    const { socket } = useSocket(chat.chatId);
 
     useEffect(() => {
         let isMounted = true;
@@ -140,6 +143,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
     const handleDelete = async (messageId: number) => {
         try {
             await apiDeleteMessage(messageId);
+            addAlert("Message deleted", "success", 1000);
         } catch (err) {
             console.error(err);
         }
@@ -156,6 +160,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
             await patchMessage(messageId, messageContent || "");
             setEditMessageId(null);
             setIsEditing(false);
+            addAlert("Message edited", "success", 1000);
         } catch (err) {
             console.error(err);
         }
@@ -184,11 +189,11 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                                     {msg.sender?.display_name ? <p className="text-xs text-white/50">{msg.sender?.display_name}</p> : <p className="text-xs text-white/50">{msg.sender?.username}</p>}
                                     {msg.reply_content && (
                                         <div className="flex flex-row items-center bg-white/35 px-3 py-1 rounded-lg gap-2">
-                                            <img src="/images/reply.svg" className="h-5 opacity-50" />
+                                            <img src="/images/reply.svg" alt="Reply" className="h-5 opacity-50" />
                                             <p>{msg.reply_content}</p>
                                         </div>
                                     )}
-                                    {msg.image_url && <img src={`http://localhost:5050${msg.image_url}`} alt="uploaded" className="w-72 rounded-2xl my-2" />}
+                                    {msg.image_url && <img src={`http://localhost:5050${msg.image_url}`} alt="Uploaded" className="w-72 rounded-2xl my-2" />}
                                     <span>{msg.content}</span>
                                     <div className={`flex ${msg.sender?.id === chat.userId ? "flex-row" : "flex-row-reverse"} gap-1 text-xs`}>
                                         <p className="text-white/50">{new Date(msg.sent_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
@@ -243,7 +248,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                             <div className="flex flex-col w-full bg-[#21242B]/50 rounded-2xl">
                                 <div className="flex flex-row items-center justify-between mx-3 mt-3 mb-2 px-3 py-1 bg-[#9371EB]/50 rounded-t-xl rounded-b-md">
                                     <div className="flex flex-row gap-2 items-center">
-                                        <img src="/images/edit.svg" className="h-4 opacity-50" />
+                                        <img src="/images/edit.svg" alt="Edit" className="h-4 opacity-50" />
                                         <p>{oldMessageContent}</p>
                                     </div>
                                     <p onClick={() => setIsEditing(false)} className="text-lg cursor-pointer">
@@ -270,7 +275,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                             <div className="flex flex-col w-full bg-[#21242B]/50 rounded-2xl">
                                 <div className="flex flex-row items-center justify-between mx-3 mt-3 mb-2 px-3 py-1 bg-[#9371EB]/50 rounded-t-xl rounded-b-md">
                                     <div className="flex flex-row gap-2 items-center">
-                                        <img src="/images/reply.svg" className="h-4 opacity-50" />
+                                        <img src="/images/reply.svg" alt="Relpy" className="h-4 opacity-50" />
                                         <p>{replyedMessageContent}</p>
                                     </div>
                                     <p onClick={() => setIsReplying(false)} className="text-lg cursor-pointer">
@@ -314,7 +319,7 @@ const ChatWindow = ({ chat }: { chat: ChatProps }) => {
                         )}
 
                         <label className={`min-w-12 h-12 flex justify-center items-center ${selectedFile ? "bg-[#9371EB]" : "bg-[#555]"}  cursor-pointer text-white rounded-2xl viol-glow`}>
-                            <img src={selectedFile ? "/images/done.svg" : "/images/clip.svg"} alt="Add photo" className="h-5 " />
+                            <img src={selectedFile ? "/images/done.svg" : "/images/clip.svg"} alt="Add" className="h-5 " />
                             <input type="file" className="hidden" onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)} />
                         </label>
 

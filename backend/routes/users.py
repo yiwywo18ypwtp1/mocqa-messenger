@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 
 import bcrypt
 
@@ -11,13 +12,8 @@ router = APIRouter()
 
 @router.post("/register")
 def register(user: UserCreate, db=Depends(get_db)):
-    try:
-        user_exists = db.query(User).filter(User.username == user.username).first()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-    if user_exists:
-        raise HTTPException(status_code=400, detail="Username already exists")
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(status_code=409, detail="Username already exists")
 
     hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
 
@@ -32,9 +28,9 @@ def register(user: UserCreate, db=Depends(get_db)):
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-    except IntegrityError:
+    except IntegrityError as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Error creating user")
+        raise HTTPException(status_code=500, detail="Error creating user, DB error: " + str(e))
 
     return {"message": "User created successfully", "user": {"id": new_user.id, "username": new_user.username}}
 
@@ -43,7 +39,10 @@ def register(user: UserCreate, db=Depends(get_db)):
 def login(user: UserLogin, db=Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
 
-    if not db_user or not bcrypt.checkpw(user.password.encode(), db_user.password.encode()):
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not bcrypt.checkpw(user.password.encode(), db_user.password.encode()):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(data={"sub": db_user.username})

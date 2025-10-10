@@ -1,7 +1,6 @@
 from fastapi import Request, HTTPException, status, Depends
 
 from datetime import datetime, timedelta
-from typing import Dict, List
 from dotenv import load_dotenv
 import jwt
 import os

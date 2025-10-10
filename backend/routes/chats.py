@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 
-from database import get_db, User, Message, Chat, ChatParticipant
+from database import get_db, User, Chat, ChatParticipant
 from models import CreateChatRequest
 from auth import get_current_user
 from utils import security
